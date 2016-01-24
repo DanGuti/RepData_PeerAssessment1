@@ -1,13 +1,14 @@
 # Reproducible Research: Peer Assessment 1
 
+echo = TRUE
 
 ## Loading and preprocessing the data
 
 ```r
 ### Load the data
 url <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
-download.file(url,"data.zip", method ="wget") ##download the zip file
-data <- read.csv(unz("data.zip", filename="activity.csv")) ##unzip and read csv
+download.file(url,"data.zip") ##download the zip file
+data <- read.csv(unz("data.zip", filename="activity.csv")) ##unzip and read the csv
 
 ### Preprocess data
 data$date = as.Date(data$date, format = "%Y-%m-%d") ##set to date class
@@ -15,28 +16,46 @@ data$interval = as.factor(data$interval)
 ```
 
 
-## What is mean total number of steps taken per day?
-First the steps by date ar loadaded in the *stepsbydate* variable and then, plot a histogram of the data.
+## 1. What is mean total number of steps taken per day?
+First the steps by date are loadaded in the *stepsbydate* variable.
+Then the data is plotted to a histogram.
 
 
 ```r
 stepsbydate <- aggregate(steps ~ date, data = data, FUN = sum, 
                         na.action = na.omit) ## sum data by date
+head(stepsbydate) ##shows the first data items for stepsbydate
+```
+
+```
+##         date steps
+## 1 2012-10-02   126
+## 2 2012-10-03 11352
+## 3 2012-10-04 12116
+## 4 2012-10-05 13294
+## 5 2012-10-06 15420
+## 6 2012-10-07 11015
+```
+1.1 The first of the calculated values of steps by date are shown above.
+
+
+```r
 hist(stepsbydate$steps, main = "Histogram of steps by date",
      xlab = "Amount of steps by date") ## Plot a histogram of resulting data
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)
 
 ```r
 ### CAlculate mean and median
 mean = mean(stepsbydate$steps)
 median = median(stepsbydate$steps)
 ```
+1.2 The histogram for total number of steps per day is shown above  
 
-The mean is 1.0766189\times 10^{4}, and the median is 10765.
+1.3 The mean is 1.0766189\times 10^{4} steps per day, and the median is 10765 steps by day.
 
-## What is the average daily activity pattern?
+## 2. What is the average daily activity pattern?
 The data is aggregated by day to plot average daily values. Note values are divided by number of days.
 
 
@@ -46,29 +65,30 @@ stepsbytime <- aggregate(steps ~ interval, data = data, FUN = sum)
 ### Sum by date
 stepsbytime$meansteps = stepsbytime$steps / nrow(stepsbydate)
 plot(stepsbytime$interval, stepsbytime$meansteps, xlab = "Interval",
-    ylab = "Steps averaged by day", main = "Daily Activity Pattern")
+    ylab = "Steps averaged by day", main = "Daily Activity Pattern", type = "l")
 lines(stepsbytime$interval, stepsbytime$meansteps)
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)
 
 ```r
 maxint = which.max(stepsbytime$meansteps)
 value = max(stepsbytime$meansteps)
 ```
+2.1 The Interval plot is shown above  
 
-The interval with the maximum number of steps is interval 104, which has 206.1698113 steps on average.
+2.2 The interval with the maximum number of steps is interval 104, which has 206.1698113 steps on average.
 
 
-## Imputing missing values
+## 3. Imputing missing values
 First we report the number of missing values with the code: 
 
 ```r
 missing = sum(is.na(data))
 ```
-There are 2304 missing values.
+1.1 There are 2304 missing values.
 
-Then we segregate the NA values from the data set, assign average interval values to the missing steps values and merge the data with the original data.
+1.2 Then we segregate the NA values from the data set, assign average interval values to the missing steps values and merge the data with the original data.
 
 ```r
 library(plyr) ##for using mapvalues function
@@ -91,7 +111,7 @@ head(dat2)
 ## 5 0.0754717 2012-10-01       20
 ## 6 2.0943396 2012-10-01       25
 ```
-As we can observe, missing values have been replaced with average interval values. We can now re-evaluate the data like previously done.
+1.3 As we can observe, missing values have been replaced with average interval values. We can now re-evaluate the data like previously done.
 
 
 ```r
@@ -100,7 +120,7 @@ hist(stepsbydate$steps, main = "Histogram of steps by date",
      xlab = "Amount of steps by date") ##Plot a histogram of the resulting data
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-7-1.png)
 
 ```r
 ## 
@@ -108,11 +128,11 @@ mean = mean(stepsbydate$steps)
 median = median(stepsbydate$steps)
 ```
 
-The mean is 1.0766189\times 10^{4} and the median is 1.0766189\times 10^{4}.
+1.4 The mean is 1.0766189\times 10^{4} and the median is 1.0766189\times 10^{4}.
 
 
-## Are there differences in activity patterns between weekdays and weekends?
-First, the weekend/weekday factor is created by using weekdays() function.
+## 4. Are there differences in activity patterns between weekdays and weekends?
+1.1 First, the weekend/weekday factor is created by using weekdays() function.
 
 
 ```r
@@ -122,7 +142,7 @@ wtest <- days %in% wkend##logical value of weekend or not
 dat2$WE <- factor(wtest, labels = c("Weekday","Weekend")) ##Weekend factor var.
 ```
 
-Then we plot the results.
+1.2 Then we plot the results.
 
 
 ```r
@@ -154,7 +174,7 @@ plot(dstepsbytime$interval, dstepsbytime$meansteps, type = "l",
      main = "Weekday")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-8-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-9-1.png)
 
 ```r
 dev.off()
